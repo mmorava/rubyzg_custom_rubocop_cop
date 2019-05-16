@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-
 module RuboCop
   module Cop
     module Custom
@@ -27,12 +26,25 @@ module RuboCop
           (pair (sym :id) (sym :integer))
         PATTERN
 
+        def_node_search :table_name, <<-PATTERN
+          (send _ :create_table ({sym str} _) ...)
+        PATTERN
+
         def on_send(node)
           return unless node.command?(:create_table)
           return if defines_id_field_as_integer?(node)
 
           add_offense(node)
         end
+
+        def autocorrect(node)
+          table_name_node = table_name(node).first
+
+          lambda do |corrector|
+            corrector.insert_after(table_name_node.source_range, ', id: :integer')
+          end
+        end
+        
       end
     end
   end
