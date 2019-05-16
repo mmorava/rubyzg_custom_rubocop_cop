@@ -48,4 +48,54 @@ describe RuboCop::Cop::Custom::EnforceIntPrimaryKey do
       RUBY
     end
   end
+
+  describe 'autocorrect' do
+    it 'autocorrects method call when called without options argument' do
+      new_source = autocorrect_source <<-RUBY
+      create_table :some_table_name do |t|
+          t.string :name
+          t.string :email
+        end
+      RUBY
+
+      expect(new_source).to eq <<-RUBY
+      create_table :some_table_name, id: :integer do |t|
+          t.string :name
+          t.string :email
+        end
+      RUBY
+    end
+
+    it 'autocorrects method call when called with a options argument' do
+      new_source = autocorrect_source <<-RUBY
+        create_table :some_table_name, primary_key: :name do |t|
+            t.string :name
+            t.string :email
+          end
+      RUBY
+
+      expect(new_source).to eq <<-RUBY
+        create_table :some_table_name, primary_key: :name, id: :integer do |t|
+            t.string :name
+            t.string :email
+          end
+      RUBY
+    end
+
+    it 'autocorrects method call when table name is a string' do
+      new_source = autocorrect_source <<-RUBY
+      create_table "some_table_name" do |t|
+          t.string :name
+          t.string :email
+        end
+      RUBY
+
+      expect(new_source).to eq <<-RUBY
+      create_table "some_table_name", id: :integer do |t|
+          t.string :name
+          t.string :email
+        end
+      RUBY
+    end
+  end
 end
