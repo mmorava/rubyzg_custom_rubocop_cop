@@ -20,6 +20,19 @@ module RuboCop
         #    ...
         #    ...
         # end
+
+        MSG = 'Use an integer field type for id column when creating a new table.'
+
+        def_node_search :defines_id_field_as_integer?, <<-PATTERN
+          (pair (sym :id) (sym :integer))
+        PATTERN
+
+        def on_send(node)
+          return unless node.command?(:create_table)
+          return if defines_id_field_as_integer?(node)
+
+          add_offense(node)
+        end
       end
     end
   end
