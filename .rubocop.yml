@@ -1,0 +1,3 @@
+require: './rubocop/cop/custom/enforce_int_primary_key'
+Custom/EnforceIntPrimaryKey:
+  Enabled: true
